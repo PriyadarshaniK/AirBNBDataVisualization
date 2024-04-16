@@ -10,11 +10,23 @@ from wordcloud import WordCloud, STOPWORDS
 import warnings
 warnings.filterwarnings('ignore')
 
+#Setting the page layout
 st.set_page_config(
     page_title="Airbnb Data Visualization",
     page_icon="house_with_garden",
     layout="wide",
     initial_sidebar_state="expanded")
+
+#for smaller text below each plot
+st.markdown("""
+<style>
+.small-font {
+    font-size:10px !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 
 # READING THE CLEANED DATAFRAME
 airbnb_df = pd.read_csv(r'C:\Users\Acer\Desktop\PythonPrograms\AirbnbProject4\AirbnbCleanData.csv')
@@ -31,6 +43,7 @@ with header:
 with sidebar1:
     selection = sidebar1.radio("What's your choice of task?",[":house: Home",":bar_chart:(Static-Data-Insights)",":chart_with_upwards_trend:(Dynamic-Data-Insights)"])
 
+#Plain text information about the project and what it  intends to do
 if selection == ":house: Home": 
     st.markdown("Airbnb, Inc. is an American company operating an online marketplace for short- and long-term homestays and experiences. The company acts as a broker and charges a commission from each booking. The company was founded in 2008 by Brian Chesky, Nathan Blecharczyk, and Joe Gebbia. Airbnb is a shortened version of its original name, AirBedandBreakfast.com. Airbnb is the most well-known company for short-term housing rentals")
     st.markdown("Airbnb has provided many travellers a great, easy and convenient place to stay during their travels. Similarly, it has also given an opportunity for many to earn extra revenue by listing their properties for residents to stay. However, with so many listings available with varying prices - ")
@@ -38,6 +51,7 @@ if selection == ":house: Home":
     st.markdown("- Additionally, if a traveller wants to find the cheapest listing available but with certain features he prefers like 'free parking' etc, how does he know what aspects to look into, to find a suitable listing?")
     st.markdown(" There are many factors which influence the price of a listing. Which is why this project aims to find the most important factors that affect the price and more importantly the features that are common among the most expensive listings. This will allow an aspiring Airbnb host to ensure that his listing is equipped with those important features such that he will be able to charge a higher price without losing customers. Moreover, a traveller will also know the factors to look into to get the lowest price possible while having certain features he prefers. ")
 
+#In this screen all the static data insights can be viewed. There are no user inputs taken here and different columns of the dataset have been analysed and interpreted here
 if selection == ":bar_chart:(Static-Data-Insights)":
 
     col1,col2 = st.columns([3,3])
@@ -54,6 +68,8 @@ if selection == ":bar_chart:(Static-Data-Insights)":
         plt.xlabel('Count')
         plt.ylabel('Property Type')
         st.pyplot(fig)
+
+        st.markdown('<p class="small-font">From the above graph, we can see that maximum listings are of apartment and next comes full houses. Other property types in the dataset are very less. As we discover in the next graph, hosts prefer to list their full property than just a room or shared room, it can be inferred that most listings in this dataset are entire apartments or entire houses.</p>', unsafe_allow_html=True)
         
 
     with col2:
@@ -67,7 +83,7 @@ if selection == ":bar_chart:(Static-Data-Insights)":
         plt.ylabel('Room Type')
         st.pyplot(fig)
         
-
+        st.markdown('<p class="small-font">As can be seen from the countplot, most of the listings were the entire home/apartment. There are almost twice as many entire home/apartment listings as private room listings. This gives a small insight into the type of listings available and the number of each type.</p>', unsafe_allow_html=True)
 
     
     col4, col5 = st.columns([3,3])
@@ -88,6 +104,8 @@ if selection == ":bar_chart:(Static-Data-Insights)":
         plt.ylabel('Property Type')
         st.pyplot(fig)
 
+        st.markdown('<p class="small-font">From the above heatmap, with lighter colour(yellow) representing higher price and darker(blue) representing lower price, we can see that shared rooms in a condominium have the lightest colour hence costliest. Private rooms have a slightly darker colour so they are in the middle, and entire houses in a "bed and breaksfast" are the next lightest thus they are next level expensive. It is also important to note that the highest number of listings which was house and apartments actually have higher costs for the "Entire home/apt" room_type category. All of this tells us that the room_type and property_type both play a very important role in the final price of the listing.</p>', unsafe_allow_html=True)
+
     with col5:
         fig = plt.figure(figsize=(10,8))
         sns.boxplot(data=airbnb_df, x="bedrooms", y="price",palette = 'plasma',whis = 1.5,showfliers=False)
@@ -95,6 +113,8 @@ if selection == ":bar_chart:(Static-Data-Insights)":
         plt.xlabel('Number of bedrooms')
         plt.ylabel('Price')
         st.pyplot(fig)
+
+        st.markdown('<p class="small-font">From the box plots above, it can be seen that listings have higher prices as the number of bedrooms increase.</p>', unsafe_allow_html=True)
 
     col6,col7 = st.columns([3,3])
     with col6:
@@ -117,10 +137,15 @@ if selection == ":bar_chart:(Static-Data-Insights)":
         plt.axis('off')
         st.image(wordcloud.to_array(), caption='Word Cloud of Amenities from Top 100 Listings', use_column_width=True)
 
+        st.markdown('<p class="small-font">The word cloud above was taken from the top 100 listings in terms of their price. We can see that the listings with the highest prices have amenities such as Hot water, Wifi, Kitchen, Laptop friendly, friendly workspace. So, an aspiring Airbnb host should ensure that his property contains these amenities so that he can charge a higher price. Similarly, if a traveller does not require any of these amenities, he can opt for a listing without them to save cost.</p>', unsafe_allow_html=True)
+
     with col7:
         fig = plt.figure(figsize=(10,8))
         g = sns.countplot(data=airbnb_df,x=airbnb_df.host_neighbourhood.values,order=airbnb_df.host_neighbourhood.value_counts().index[:25],palette = "Set3")
         g.set_xticklabels(g.get_xticklabels(),rotation=45, ha="right")
+        # Add labels to each bar
+        for container in g.containers:
+            g.bar_label(container, fontsize=8)
         plt.title('Top Number of Listings for neighborhoods')
         plt.ylabel('Number of Listings')
         st.pyplot(fig)
@@ -129,23 +154,32 @@ if selection == ":bar_chart:(Static-Data-Insights)":
 
     with col8:
         fig = plt.figure(figsize=(10,8))
-        ax = sns.barplot(airbnb_df, x="host_neighbourhood", y="price", order=airbnb_df.host_neighbourhood.value_counts().index[:25], estimator="median", errorbar=None)
-        ax.bar_label(ax.containers[0], fontsize=8)
+        ax = sns.barplot(airbnb_df, x="host_neighbourhood", y="price", order=airbnb_df.host_neighbourhood.value_counts().index[:25], estimator="median", errorbar=None,palette='magma')
+        # Add labels to each bar
+        for container in ax.containers:
+            ax.bar_label(container, fontsize=8)
         ax.set_xticklabels(ax.get_xticklabels(),rotation=45, ha="right")
         plt.title('Number of listings for each neighbourhood and the median price')
         plt.xlabel('Neighbourhood')
         plt.ylabel('Median Price')
         st.pyplot(fig)
+
+        st.markdown('<p class="small-font">From the plots above, we can see that most of the listings appear in Copacabana, LePlateau, Mongkok, Waikiki etc. This gives us a good insight into the potential neighbourhoods where there are higher number of listings which we can tap into. By analyzing the number of listings and prices for each neighborhood, we can get a clearer understanding of which neighbourhoods have a lot of expensive listings. Looking at the analysis done so far, we can see that certain neighbourhoods are indeed more expensive than others. However, some of those neighbourhoods do not have as many listings as other expensive neighbourhoods.</p>', unsafe_allow_html=True)
     with col9:
         fig = plt.figure(figsize=(10,8))
-        g = sns.barplot(airbnb_df, x="room_type", y="availability_365", estimator="median",errorbar=None)
-        g.bar_label(g.containers[0], fontsize=10)
+        g = sns.barplot(airbnb_df, x="room_type", y="availability_365", estimator="median",errorbar=None,palette='inferno')
+        # Add labels to each bar
+        for container in g.containers:
+            g.bar_label(container, fontsize=8)
         g.set_xticklabels(g.get_xticklabels(),rotation=45, ha="right")
         plt.title('Availability of Room Types')
         plt.xlabel('Room Type')
         plt.ylabel('Median Availability')
         st.pyplot(fig)
-    
+
+        st.markdown('<p class="small-font">From this plot we can observe that Shared Rooms listings tend to have more availability throughout the year whereas Private Rooms have lesser availability.</p>', unsafe_allow_html=True)
+
+#Here user inputs for some columns of the dataset are taken and corresponding plots for the selected values can be viewed.
 if selection == ":chart_with_upwards_trend:(Dynamic-Data-Insights)":
     col1,col2,col3,col4 = st.columns([4,3,3,3])
     with col1:
@@ -208,6 +242,7 @@ if selection == ":chart_with_upwards_trend:(Dynamic-Data-Insights)":
                                )
             st.plotly_chart(fig,use_container_width=True)
 
+    #option to view different column values as hover information.
     col8,col9 = st.columns([1,5])
     with col8:
         hoverInfo = st.selectbox('Select Hover Text',['Accomodates','Bedrooms','Beds','Bathrooms','Availability','Price'])
@@ -287,5 +322,46 @@ if selection == ":chart_with_upwards_trend:(Dynamic-Data-Insights)":
 
     with col9:    
         st.plotly_chart(fig,use_container_width=True)
-    
+
+    # Creating scatter map for a specific country and all listings in that country
+    col10,col11 = st.columns([2,6])
+    with col10:
+        country_sel = st.selectbox('Select a Country to view all Airbnb listed',sorted(airbnb_df.country_name.unique()))
+        country_df = airbnb_df.query("country_name == @country_sel")
+    fig = px.scatter_geo(country_df, lat='latitude', lon='longitude', color='price',
+                             hover_name='name',
+                             title='Airbnbs listed in specific country')
+       
+    st.plotly_chart(fig,use_container_width=True)
+    #displaying costliest and cheapest listings in the selected country
+    col12,col13 = st.columns([3,3])
+    with col12:
+        fig = plt.figure(figsize=(10,8))
+        # Sort DataFrame by price for top 15 costliest listings
+        price_df = country_df.sort_values(by='price', inplace=False)
+
+        ax = sns.barplot(price_df.head(15), x="name", y="price",palette = "bright")
+        for container in ax.containers:
+            ax.bar_label(container, fontsize=8)
+        ax.set_xticklabels(ax.get_xticklabels(),rotation=45, ha="right")
+        plt.title('Top 15 cheapest Listings')
+        plt.xlabel('Name of Listing')
+        plt.ylabel('Price')
+        st.pyplot(fig)
+
+    with col13:
+        fig = plt.figure(figsize=(10,8))
+        # Sort DataFrame by price for top 15 cheapest listings
+        price_df = country_df.sort_values(by='price', ascending = False, inplace=False)
+
+
+        ax = sns.barplot(price_df.head(15), x="name", y="price",palette = "dark")
+        for container in ax.containers:
+            ax.bar_label(container, fontsize=8)
+        ax.set_xticklabels(ax.get_xticklabels(),rotation=45, ha="right")
+        plt.title('Top 15 costliest Listings')
+        plt.xlabel('Name of Listing')
+        plt.ylabel('Price')
+        st.pyplot(fig)
+        
         
